@@ -2,10 +2,8 @@
 
 namespace App\Services\QueryBuilderFilter\Exceptions;
 
-use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\Response;
+use App\Services\Search\Exceptions\SearchDataValidationException;
 
-class UnsupportedSearchOperatorTypeException extends InvalidArgumentException
+class UnsupportedSearchOperatorTypeException extends SearchDataValidationException
 {
-    protected $code = Response::HTTP_INTERNAL_SERVER_ERROR;
 }

@@ -60,7 +60,7 @@ RUN if [ ${INSTALL_SOAP} = true ]; then \
 #####################################
 # xDebug:
 #####################################
-ARG INSTALL_XDEBUG=false
+ARG INSTALL_XDEBUG=true
 RUN if [ ${INSTALL_XDEBUG} = true ]; then \
     # Install the xdebug extension
     pecl install xdebug && \

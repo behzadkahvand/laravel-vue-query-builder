@@ -50,7 +50,7 @@ services:
       context: ./php-fpm
       args:
         - PHP_VERSION=${PHP_VERSION}
-        - INSTALL_XDEBUG=false
+        - INSTALL_XDEBUG=true
         - INSTALL_OPCACHE=false
         - INSTALL_AMQP=false
         - INSTALL_SOAP=true

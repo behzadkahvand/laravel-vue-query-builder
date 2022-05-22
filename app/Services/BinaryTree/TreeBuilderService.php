@@ -4,6 +4,7 @@ namespace App\Services\BinaryTree;
 
 use App\Enums\OperandCount;
 use App\Enums\TreeNodeType;
+use App\Services\QueryBuilderFilter\Exceptions\InvalidQueryParamData;
 use App\Services\QueryBuilderFilter\Exceptions\UnsupportedSearchOperatorTypeException;
 use App\Services\Search\Operators\OperatorInterface;
 use App\Services\Utils\BinaryTree\BinaryNode;
@@ -53,7 +54,7 @@ class TreeBuilderService
         }
 
         if (!$this->isTreeValid()) {
-            throw new UnsupportedSearchOperatorTypeException();
+            throw new UnsupportedSearchOperatorTypeException("Operator not supported!");
         }
 
         return $node;
@@ -81,7 +82,11 @@ class TreeBuilderService
             }
         }
 
-        return $children;
+        if (!$this->stack->isEmpty()){
+            throw new InvalidQueryParamData("Query param data structure is invalid!");
+        }
+
+            return $children;
     }
 
     private function createNode(

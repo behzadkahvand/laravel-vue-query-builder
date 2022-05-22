@@ -12,7 +12,7 @@ class PostSearchService
 
     public function search(SearchData $data, Pagination $pagination): SearchResult
     {
-        $searchQuery = $this->postSearchDriver->getQuery($data, $pagination);
+        $searchQuery = $this->postSearchDriver->getQuery($data);
 
         $result = $this->paginator->paginate($searchQuery->getResultQuery(), $pagination);
 

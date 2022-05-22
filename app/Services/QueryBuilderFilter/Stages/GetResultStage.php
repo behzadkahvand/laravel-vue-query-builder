@@ -3,13 +3,14 @@
 namespace App\Services\QueryBuilderFilter\Stages;
 
 use Closure;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
 class GetResultStage implements FilterStageInterface
 {
     public function handle(QueryContextData $contextData, Closure $next)
     {
-        $queryBuilder = DB::table($contextData->getSourceTable());
+        $queryBuilder = $this->getInitQueryBuilder($contextData);
 
         if (!empty($contextData->getWhereQuery())) {
             $queryBuilder = $queryBuilder->whereRaw($contextData->getWhereQuery(),
@@ -20,5 +21,10 @@ class GetResultStage implements FilterStageInterface
         }
 
         return $queryBuilder;
+    }
+
+    protected function getInitQueryBuilder(QueryContextData $contextData): Builder
+    {
+        return DB::table($contextData->getSourceTable());
     }
 }
