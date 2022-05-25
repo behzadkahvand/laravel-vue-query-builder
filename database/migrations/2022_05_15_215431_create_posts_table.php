@@ -19,7 +19,7 @@ class CreatePostsTable extends Migration
             $table->string("title");
             $table->text("content")->nullable();
             $table->integer("views")->default(0);
-            $table->integer("timestamp");
+            $table->bigInteger("timestamp");
         });
     }
 

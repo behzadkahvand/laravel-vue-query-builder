@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(PostController::class)->prefix("store")->group(function () {
     Route::get('/', 'index');
+    Route::get('/{id}', 'view');
     Route::match(['post', 'patch'], '/', 'store');
     Route::put('/{id}', 'update');
     Route::delete('/{id}', 'delete');

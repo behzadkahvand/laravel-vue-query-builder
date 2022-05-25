@@ -5,14 +5,13 @@ namespace App\Http\Controllers;
 use App\DTO\PostData;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
-use App\Services\PostCrud\PostCrudService;
+use App\Repositories\PostRepository;
 use App\Services\Search\Exceptions\SearchDataValidationException;
 use App\Services\Search\Pagination;
 use App\Services\Search\PostSearchService;
 use App\Services\Search\SearchData;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class PostController extends Controller
 {
@@ -28,31 +27,35 @@ class PostController extends Controller
                 new Pagination($page, $limit)
             );
         } catch (SearchDataValidationException $e) {
-            return response($e->getMessage(), ResponseAlias::HTTP_UNPROCESSABLE_ENTITY)
-                ->json();
+            return $this->respondInvalidParameters($e->getMessage());
         }
 
-        return response()->json($searchResult->getResults());
+        return $this->respond($searchResult->getResults());
     }
 
-    public function store(StorePostRequest $request, PostCrudService $postCrudService): JsonResponse
+    public function view(string $id, PostRepository $postRepository): JsonResponse
     {
-        $postCrudService->store(new PostData($request->post()));
-
-        return response()->json([]);
+        return $this->respond($postRepository->findById($id)->toArray());
     }
 
-    public function update(string $id, UpdatePostRequest $request, PostCrudService $postCrudService): JsonResponse
+    public function store(StorePostRequest $request, PostRepository $postRepository): JsonResponse
     {
-        $postCrudService->update($id, new PostData($request->post()));
+        $postRepository->createOrUpdate(new PostData($request->post()));
 
-        return response()->json([]);
+        return $this->respond([]);
     }
 
-    public function delete(string $id, PostCrudService $postCrudService): JsonResponse
+    public function update(string $id, UpdatePostRequest $request, PostRepository $postRepository): JsonResponse
     {
-        $postCrudService->delete($id);
+        $postRepository->updateById($id, new PostData($request->post()));
 
-        return response()->json([]);
+        return $this->respond([]);
+    }
+
+    public function delete(string $id, PostRepository $postRepository): JsonResponse
+    {
+        $postRepository->deleteById($id);
+
+        return $this->respond([]);
     }
 }

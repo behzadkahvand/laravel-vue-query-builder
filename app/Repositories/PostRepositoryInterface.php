@@ -2,11 +2,15 @@
 
 namespace App\Repositories;
 
+use App\DTO\PostData;
+
 interface PostRepositoryInterface
 {
-    public function createOrUpdate(array $conditions, array $data): void;
+    public function createOrUpdate(PostData $data): void;
 
-    public function updateById(string $id, array $data): void;
+    public function findById(string $id): PostData;
+
+    public function updateById(string $id, PostData $data): void;
 
     public function deleteById(string $id): void;
 }

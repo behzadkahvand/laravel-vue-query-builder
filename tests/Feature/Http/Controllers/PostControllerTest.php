@@ -17,31 +17,34 @@ class PostControllerTest extends TestCase
 
         $response = $this->getJson("/api/store/?query=$query&sort=$sort");
 
-        $response->assertStatus(200)->assertJson(fn(AssertableJson $json) => $json->has('current_page')
-                                                                                  ->has('first_page_url')
-                                                                                  ->has("from")
-                                                                                  ->has("last_page")
-                                                                                  ->has("last_page_url")
-                                                                                  ->has("path")
-                                                                                  ->where('total', 2)
-                                                                                  ->has('data', 2)
-                                                                                  ->has('data.0',
-                                                                                      fn($json) => $json->where('id',
-                                                                                          "fifth-post")
-                                                                                                        ->where('views',
-                                                                                                            50)
-                                                                                                        ->where('timestamp',
-                                                                                                            1043157345)
-                                                                                                        ->etc()
+        $response->assertStatus(200)->assertJson(fn(AssertableJson $json) => $this->assertRequiredResponseResult($json)
+                                                                                  ->has('results',
+                                                                                      fn($json) => $json->has('current_page')
+                                                                                                        ->has('first_page_url')
+                                                                                                        ->has("from")
+                                                                                                        ->has("last_page")
+                                                                                                        ->has("last_page_url")
+                                                                                                        ->has("path")
+                                                                                                        ->where('total',
+                                                                                                            2)
+                                                                                                        ->has('data', 2)
+                                                                                                        ->has('data.0',
+                                                                                                            fn($json) => $json->where('id',
+                                                                                                                "fifth-post")
+                                                                                                                              ->where('views',
+                                                                                                                                  50)
+                                                                                                                              ->where('timestamp',
+                                                                                                                                  1043157345)
+                                                                                                                              ->etc()
+                                                                                                        )
+                                                                                                        ->has('data.1',
+                                                                                                            fn($json) => $json->where('id',
+                                                                                                                "first-post")
+                                                                                                                              ->where('views',
+                                                                                                                                  100)
+                                                                                                                              ->etc()
+                                                                                                        )->etc()
                                                                                   )
-                                                                                  ->has('data.1',
-                                                                                      fn($json) => $json->where('id',
-                                                                                          "first-post")
-                                                                                                        ->where('views',
-                                                                                                            100)
-                                                                                                        ->etc()
-                                                                                  )
-                                                                                  ->etc()
         );
     }
 
@@ -52,7 +55,9 @@ class PostControllerTest extends TestCase
 
         $response = $this->getJson("/api/store/?query=$query&sort=$sort");
 
-        $response->assertStatus(500);
+        $response->assertStatus(422)->assertJson(fn(AssertableJson $json) => $this->assertRequiredResponseResult($json,
+            false)
+        );
     }
 
     public function testSearchFailedWhenOperatorNotSupported(): void
@@ -62,7 +67,33 @@ class PostControllerTest extends TestCase
 
         $response = $this->getJson("/api/store/?query=$query&sort=$sort");
 
-        $response->assertStatus(500);
+        $response->assertStatus(422)
+                 ->assertJson(fn(AssertableJson $json) => $this->assertRequiredResponseResult($json, false));
+    }
+
+    public function testViewPostSuccessfully(): void
+    {
+        $response = $this->getJson("/api/store/first-post");
+
+        $response->assertStatus(200)->assertJson(fn(AssertableJson $json) => $this->assertRequiredResponseResult($json)
+                                                                                  ->has("results",
+                                                                                      fn($json) => $json->has('id')
+                                                                                                        ->has('title')
+                                                                                                        ->has('content')
+                                                                                                        ->has('views')
+                                                                                                        ->has('timestamp')
+                                                                                  )
+
+        );
+    }
+
+    public function testViewNotFoundWhenPostNotExist(): void
+    {
+        $response = $this->getJson("/api/store/not-exist-post");
+
+        $response->assertStatus(404)->assertJson(fn(AssertableJson $json) => $this->assertRequiredResponseResult($json,
+            false)
+        );
     }
 
     public function testCreateNewPostSuccessfullyWhenIdNotExist(): void
@@ -74,7 +105,8 @@ class PostControllerTest extends TestCase
                 "timestamp" => 1000,
             ]
         );
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+                 ->assertJson(fn(AssertableJson $json) => $this->assertRequiredResponseResult($json));
 
         $this->assertDatabaseCount('posts', 6);
         $this->assertDatabaseHas('posts', [
@@ -93,10 +125,11 @@ class PostControllerTest extends TestCase
                 "title"     => "first title",
                 "views"     => 10,
                 "timestamp" => 1000,
-                "content" => "content test"
+                "content"   => "content test",
             ]
         );
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+                 ->assertJson(fn(AssertableJson $json) => $this->assertRequiredResponseResult($json));
 
         $this->assertDatabaseCount('posts', 5);
 
@@ -105,21 +138,22 @@ class PostControllerTest extends TestCase
             'title'     => 'first title',
             'views'     => 10,
             'timestamp' => 1000,
-            "content" => "content test"
+            "content"   => "content test",
         ]);
     }
 
     public function testUpdateByIdSuccessfully(): void
     {
         $timestamp = time();
-        $response = $this->putJson("/api/store/second-post", [
+        $response  = $this->putJson("/api/store/second-post", [
                 "title"     => "second title",
                 "views"     => 20,
                 "timestamp" => $timestamp,
-                "content" => "content second test"
+                "content"   => "content second test",
             ]
         );
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+                 ->assertJson(fn(AssertableJson $json) => $this->assertRequiredResponseResult($json));
 
         $this->assertDatabaseCount('posts', 5);
 
@@ -128,7 +162,7 @@ class PostControllerTest extends TestCase
             'title'     => 'second title',
             'views'     => 20,
             'timestamp' => $timestamp,
-            "content" => "content second test"
+            "content"   => "content second test",
         ]);
     }
 
@@ -138,17 +172,20 @@ class PostControllerTest extends TestCase
                 "title"     => "second title",
                 "views"     => 20,
                 "timestamp" => time(),
-                "content" => "content second test"
+                "content"   => "content second test",
             ]
         );
-        $response->assertStatus(404);
+        $response->assertStatus(404)->assertJson(fn(AssertableJson $json) => $this->assertRequiredResponseResult($json,
+            false)
+        );
     }
 
     public function testDeleteSuccessfully(): void
     {
         $response = $this->deleteJson("/api/store/second-post");
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+                 ->assertJson(fn(AssertableJson $json) => $this->assertRequiredResponseResult($json));
 
         $this->assertDatabaseCount('posts', 4);
     }
@@ -157,6 +194,16 @@ class PostControllerTest extends TestCase
     {
         $response = $this->deleteJson("/api/store/test-post");
 
-        $response->assertStatus(404);
+        $response->assertStatus(404)->assertJson(fn(AssertableJson $json) => $this->assertRequiredResponseResult($json,
+            false)
+        );
+    }
+
+    private function assertRequiredResponseResult(AssertableJson $json, bool $isSuccess = true): AssertableJson
+    {
+        return $json->has("succeed")
+                    ->where('succeed', $isSuccess)
+                    ->has('message')
+                    ->has("results");
     }
 }

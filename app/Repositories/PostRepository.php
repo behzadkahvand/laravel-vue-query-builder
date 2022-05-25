@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\DTO\PostData;
 use App\Models\Post;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -12,20 +13,27 @@ class PostRepository extends BaseEloquentRepository implements PostRepositoryInt
         return Post::class;
     }
 
-    public function createOrUpdate(array $conditions, array $data): void
+    public function createOrUpdate(PostData $data): void
     {
-        $this->getModel()::updateOrCreate($conditions, $data);
+        $this->getModel()::updateOrCreate(['id' => $data->getId()], $data->toArray());
     }
 
-    public function updateById(string $id, array $data): void
+    public function findById(string $id): PostData
     {
-        $post = $this->find([['id', '=', $id]]);
+        $post = $this->getPost($id);
 
-        if (!$post){
-            throw (new ModelNotFoundException)->setModel($this->getModelClass(), $id);
-        }
+        return (new PostData())->setId($post->id)
+                               ->setTitle($post->title)
+                               ->setContent($post->content)
+                               ->setViews($post->views)
+                               ->setTimestamp($post->timestamp);
+    }
 
-        foreach ($data as $column => $value) {
+    public function updateById(string $id, PostData $data): void
+    {
+        $post = $this->getPost($id);
+
+        foreach ($data->toArray() as $column => $value) {
             $post->{$column} = $value;
         }
 
@@ -39,5 +47,16 @@ class PostRepository extends BaseEloquentRepository implements PostRepositoryInt
         if (!$result) {
             throw (new ModelNotFoundException)->setModel($this->getModelClass(), $id);
         }
+    }
+
+    protected function getPost(string $id): mixed
+    {
+        $post = $this->find([['id', '=', $id]]);
+
+        if (!$post) {
+            throw (new ModelNotFoundException)->setModel($this->getModelClass(), $id);
+        }
+
+        return $post;
     }
 }
