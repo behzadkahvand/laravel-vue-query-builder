@@ -90,8 +90,7 @@ class TreeBuilderServiceTest extends TestCase
         $result = ($this->sut)($param);
 
         self::assertInstanceOf(BinaryTree::class, $result[0]);
-        self::assertArrayHasKey("id_fourth_post", $result[1]);
-        self::assertEquals("fourth-post", $result[1]["id_fourth_post"]);
+        self::assertEquals("fourth-post", array_values($result[1])[0]);
     }
 
     public function testExceptionWhenOperatorNotValid(): void

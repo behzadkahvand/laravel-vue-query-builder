@@ -19,11 +19,10 @@ class PostController extends Controller
     {
         $data  = $request->query->all();
         $page  = $request->query->getInt('page', 1);
-        $limit = $request->query->getInt('limit', 20);
-
+        $limit = $request->query->getInt('limit', 100);
         try {
             $searchResult = $postSearchService->search(
-                new SearchData(remove_white_spaces($data['query'] ?? ""), remove_white_spaces($data['sort'] ?? "")),
+                new SearchData(trim($data['query'] ?? ""), remove_white_spaces($data['sort'] ?? "")),
                 new Pagination($page, $limit)
             );
         } catch (SearchDataValidationException $e) {
