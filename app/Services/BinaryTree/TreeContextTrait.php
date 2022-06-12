@@ -50,7 +50,7 @@ trait TreeContextTrait
 
     protected function getBindingKey(string $variable, $value): string
     {
-        return $variable . "_" . str_replace("-", "_", $value);
+        return $variable . "_" . rand(1, 9999999999);
     }
 
     protected function addBindingParameter(string $bindingKey, $parameter): void
