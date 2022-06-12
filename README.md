@@ -1,7 +1,7 @@
 
 ## laravel-vuejs-query-builder
 
-This is simple a query builder project has been developed with laravel and vuejs and typescript
+This is a simple query builder project has been developed with laravel and vuejs and typescript
 
 ### Bring the containers up & running
 ```
